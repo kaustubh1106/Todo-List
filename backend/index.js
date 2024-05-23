@@ -2,6 +2,9 @@ const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
 const multer = require('multer');
+const { v4: uuidv4 } = require('uuid');
+const { setSessionID , getSessionID } = require('./services/session')
+
 const job = require("./models/todo")
 const Users = require("./models/user")
 
@@ -54,6 +57,9 @@ app.post("/login",async (req,res)=>{
         }
         else if(_loginpassword && _loginusername){
             //redirect to signup page
+            const sessionID = uuidv4();
+            setSessionID(sessionID,_loginusername)
+            res.cookie
             res.send("ok good to go")
 
         }
