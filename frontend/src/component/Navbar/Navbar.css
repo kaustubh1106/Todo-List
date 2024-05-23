@@ -1,0 +1,12 @@
+.navbar{
+    height:60px;
+    width: 100%;
+    background-color: aqua;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.navbar-links Link{
+    text-decoration: none;
+    margin: 20px;
+}
