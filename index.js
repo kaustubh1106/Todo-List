@@ -21,7 +21,7 @@ app.use(cors())
 app.use(upload.none())
 
 //signup user
-app.post("/user", async (req, res) => {
+app.post("/signup", async (req, res) => {
     const { username, email, password } = req.body
     try {
         const createdUser = await Users.create({
@@ -33,6 +33,37 @@ app.post("/user", async (req, res) => {
     } catch (e) {
         console.log(e)
         res.send("sign up failed!!")
+    }
+})
+//user login
+app.post("/login",async (req,res)=>{
+    try{
+        const {username,password} = req.body
+        const _loginusername = await Users.findOne({
+            Username:username
+        })
+        const _loginpassword = await Users.findOne({
+            Password:password
+        })
+        console.log(_loginpassword)
+        if(_loginpassword && _loginusername == null){
+            res.send("wrong username ")
+        }
+        else if(_loginpassword==null && _loginusername){
+            res.send("wrong password")
+        }
+        else if(_loginpassword && _loginusername){
+            //redirect to signup page
+            res.send("ok good to go")
+
+        }
+        else{
+            res.send("sign up first")
+        }
+
+    }catch(e){
+        console.log(e)
+        res.send("error!!")
     }
 })
 
