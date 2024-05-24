@@ -1,11 +1,12 @@
 const express = require('express')
 const mongoose = require('mongoose')
-
+const cookieParser = require('cookie-parser')
 const cors = require('cors')
 const multer = require('multer');
 const {v4:uuidv4} = require("uuid")
-const { setUser , getUser } = require('./services/session')
 
+const { setUser , getUser } = require('./services/session')
+const {restrict} = require('./middleware/restrictToLoggedInUserOnly')
 const job = require("./models/todo")
 const Users = require("./models/user")
 
@@ -25,6 +26,15 @@ app.use(cors({
   }))
 const upload = multer()
 app.use(upload.none())
+app.use(cookieParser())
+app.use(restrict)
+
+
+//
+app.get("/",(req,res)=>{
+    res.status(200).json({message:"ok,logged in"})
+})
+
 
 
 //signup user
@@ -63,13 +73,9 @@ app.post("/login",async (req,res)=>{
         }
         else if(_loginpassword && _loginusername){
             //redirect to signup page
-            const sessionID = uuidv4();
-            
-            
-            
+            const sessionID = uuidv4()
             setUser(sessionID,_loginusername)
-            const himu = getUser(sessionID)
-            
+            console.log(_loginpassword)
             res.cookie("uid",sessionID);
 
             res.status(200).send("good to go")
@@ -84,28 +90,25 @@ app.post("/login",async (req,res)=>{
     }
 })
 
-app.get("/", async (req, res) => {
-    const sessionID = uuidv4();
-    res.cookie("hii",sessionID)
-    res.send("ok")
-})
 
 //getting task
-app.get("/tasks", async (req, res) => {
-    const tasks = await job.find();
+app.get("/tasks", restrict, async (req, res) => {
+    const tasks = await job.find({createdBy : req.user._id});
     res.send(tasks)
 })
 
 //creating task
-app.post("/submit", upload.none(), async (req, res) => {
+app.post("/addtasks", restrict, async (req, res) => {
+    // console.log("okkk")
     const { title, priority, comp } = req.body
     const ctime = new Date(comp)
     const _job = await job.create({
-        title: `${title}`,
-        priority: `${priority}`,
-        completeTime: `${ctime}`
+        createdBy: req.user._id,
+        title: title,
+        priority: priority,
+        completeTime: ctime
     })
-    console.log("Done")
+    console.log(_job)
 })
 
 //deleting task

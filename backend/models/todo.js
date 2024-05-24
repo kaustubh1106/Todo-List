@@ -4,6 +4,10 @@ const Schema = mongoose.Schema
 
 const todoSchema = new Schema(
     {
+        createdBy : {
+            type : Schema.Types.ObjectId,
+            ref : 'user'
+        },
         title : {
             type: String,
             trim: true,
