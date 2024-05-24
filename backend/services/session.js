@@ -1,10 +1,10 @@
 const idToUser = new Map();
 
-const setUser = ()=>{
+const setUser = (id,user)=>{
     return idToUser.set(id,user)
 }
 
-const getUser = ()=>{
+const getUser = (id)=>{
     return idToUser.get(id)
 }
 

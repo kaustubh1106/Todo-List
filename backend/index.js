@@ -1,9 +1,10 @@
 const express = require('express')
 const mongoose = require('mongoose')
+
 const cors = require('cors')
 const multer = require('multer');
-const { v4: uuidv4 } = require('uuid');
-const { setSessionID , getSessionID } = require('./services/session')
+const {v4:uuidv4} = require("uuid")
+const { setUser , getUser } = require('./services/session')
 
 const job = require("./models/todo")
 const Users = require("./models/user")
@@ -11,17 +12,20 @@ const Users = require("./models/user")
 require("dotenv").config()
 const app = express();
 
+
 //connecting model (database) to the backend
 const encodedPassword = encodeURIComponent(process.env.DB_PASSWORD);
 mongoose.connect(`mongodb+srv://kaustubhsharma1601:${encodedPassword}@job.nrad5pb.mongodb.net/?retryWrites=true&w=majority&appName=Job`)
-    .then(() => console.log('Database Connected!'))
-    .catch((e) => { console.log("monggo error", e) });
+.then(() => console.log('Database Connected!'))
+.catch((e) => { console.log("monggo error", e) });
 
+app.use(cors({
+    origin: "http://localhost:3000",
+    credentials: true // Allow cookies to be sent
+  }))
 const upload = multer()
-
-app.use(express.json());
-app.use(cors())
 app.use(upload.none())
+
 
 //signup user
 app.post("/signup", async (req, res) => {
@@ -40,31 +44,38 @@ app.post("/signup", async (req, res) => {
 })
 //user login
 app.post("/login",async (req,res)=>{
+    const {username,password} = req.body
+
     try{
-        const {username,password} = req.body
+
         const _loginusername = await Users.findOne({
             Username:username
         })
         const _loginpassword = await Users.findOne({
             Password:password
         })
-        console.log(_loginpassword)
+        // console.log(_loginpassword)
         if(_loginpassword && _loginusername == null){
-            res.send("wrong username ")
+            res.status(400).send("wrong username")
         }
         else if(_loginpassword==null && _loginusername){
-            res.send("wrong password")
+            res.status(400).send("wrong password")
         }
         else if(_loginpassword && _loginusername){
             //redirect to signup page
             const sessionID = uuidv4();
-            setSessionID(sessionID,_loginusername)
-            res.cookie
-            res.send("ok good to go")
+            
+            
+            
+            setUser(sessionID,_loginusername)
+            const himu = getUser(sessionID)
+            
+            res.cookie("uid",sessionID);
 
+            res.status(200).send("good to go")
         }
         else{
-            res.send("sign up first")
+            res.status(401).send("wrong password")
         }
 
     }catch(e){
@@ -73,6 +84,11 @@ app.post("/login",async (req,res)=>{
     }
 })
 
+app.get("/", async (req, res) => {
+    const sessionID = uuidv4();
+    res.cookie("hii",sessionID)
+    res.send("ok")
+})
 
 //getting task
 app.get("/tasks", async (req, res) => {
