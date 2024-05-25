@@ -1,7 +1,6 @@
 const {getUser} = require("../services/session")
 const restrict = async (req,res,next)=>{
     const userUid = req.cookies.uid
-    console.log("hello")
     if(!userUid){
         console.log("hello this is req",userUid)
         return res.status(404).send("no uid found")

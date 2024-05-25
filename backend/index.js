@@ -27,12 +27,17 @@ app.use(cors({
 const upload = multer()
 app.use(upload.none())
 app.use(cookieParser())
-app.use(restrict)
+
 
 
 //
-app.get("/",(req,res)=>{
-    res.status(200).json({message:"ok,logged in"})
+app.get("/",restrict, (req,res)=>{
+    try{
+        res.status(200).json({message:"ok,logged in"})
+
+    }catch(e){
+        res.status(505).json({message:"internal error occured"})
+    }
 })
 
 
